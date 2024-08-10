@@ -1,16 +1,12 @@
 import sys
 import os
 sys.path.append(os.getcwd())
-from langchain.document_loaders import PDFLoader
-from core.llm import llm,embeddings
+from langchain_community.document_loaders import PyPDFLoader
+from core.llm import embeddings
 from core.config import setting
 from langchain_experimental.text_splitter import SemanticChunker
 from langchain_community.vectorstores import Chroma
 import os
-# from dotenv import load_dotenv
-# load_dotenv()
-# OPENAI_API_KEY=os.getenv("OPENAI_API_KEY_ZANIA")
-
 text_splitter = SemanticChunker(embeddings)
 
 def load_or_create_chroma_vector_store(handbook_file_path: str):
@@ -33,8 +29,8 @@ def load_or_create_chroma_vector_store(handbook_file_path: str):
         print('vs')
     else:
         # If the directory does not exist, load the document, split it, embed each chunk, and create a new Chroma vector store
-        raw_documents = PDFLoader(handbook_file_path).load()
-        document_chunks = text_splitter.split_documents(raw_documents)
+        loader = PyPDFLoader(handbook_file_path)
+        document_chunks = loader.load_and_split(text_splitter=text_splitter)
         print('vs',document_chunks[0].page_content)
         doc_search = Chroma.from_documents(document_chunks, embeddings, persist_directory=db_directory)
         # doc_search.persist()
