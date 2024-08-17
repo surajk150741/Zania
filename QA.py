@@ -12,6 +12,9 @@ from langchain_core.retrievers import BaseRetriever
 from typing import List
 from langchain_core.documents import Document
 from langchain.retrievers.multi_query import MultiQueryRetriever
+from langchain.retrievers import ContextualCompressionRetriever
+from langchain.retrievers.document_compressors import LLMChainExtractor
+from langchain_openai import OpenAI
 # to print chain retrive context info
 langchain.verbose=True
 llm = llm
@@ -20,6 +23,15 @@ retriever = vectorstore.as_retriever()
 multi_query_retriever = MultiQueryRetriever.from_llm(
     retriever=retriever, llm=llm, include_original = True
     )
+
+##### Using contextual compression for more relevant document############
+compressor = LLMChainExtractor.from_llm(llm)
+compression_retriever = ContextualCompressionRetriever(
+    base_compressor=compressor, base_retriever=multi_query_retriever
+)
+##### Using contextual compression for more relevant document############  ## This I am only testing now, will deploy if there will be huge documents#########
+
+
 # class CustomRetriever(BaseRetriever):
 #     def __init__(self, vectorstore):
 #         self.vectorstore = vectorstore
@@ -31,7 +43,8 @@ multi_query_retriever = MultiQueryRetriever.from_llm(
 #         return documents
 # documents = vectorstore.get_relevant_documents(query)
 def docs_qa(query: str):
-    docs = multi_query_retriever.invoke(query)
+    # docs = multi_query_retriever.invoke(query)
+    docs = compression_retriever.invoke(query)
 
     # # Step 1: Retrieve documents using the custom retriever
     # documents = vectorstore.get_relevant_documents(query)
@@ -56,4 +69,13 @@ def docs_qa(query: str):
     
     return docs
 docs = docs_qa('What is the name of the company?')
-print(docs)
+# print(docs)
+
+# Helper function for printing docs. Going to use it to see the documents my retriever is fetching
+def pretty_print_docs(docs):
+    print(
+        f"\n{'-' * 100}\n".join(
+            [f"Document {i+1}:\n\n" + d.page_content for i, d in enumerate(docs)]
+        )
+    )
+pretty_print_docs(docs)
