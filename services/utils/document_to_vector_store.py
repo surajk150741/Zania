@@ -5,10 +5,11 @@ from langchain_community.document_loaders import PyPDFLoader
 from core.llm import embeddings
 from core.config import setting
 from langchain_experimental.text_splitter import SemanticChunker
-from langchain_community.vectorstores import Chroma
+# from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 import os
 text_splitter = SemanticChunker(embeddings)
-
+query = 'What is the name of the company?'
 def load_or_create_chroma_vector_store(handbook_file_path: str):
     """
     Load or create a chroma vector store for the given handbook.
@@ -27,6 +28,7 @@ def load_or_create_chroma_vector_store(handbook_file_path: str):
         # If the directory exists, load the existing Chroma vector store
         doc_search = Chroma(persist_directory=db_directory, embedding_function=embeddings)
         print('vs')
+        
     else:
         # If the directory does not exist, load the document, split it, embed each chunk, and create a new Chroma vector store
         loader = PyPDFLoader(handbook_file_path)
@@ -43,6 +45,11 @@ if __name__ == "__main__":
     try:
         chroma_vector_store = load_or_create_chroma_vector_store(handbook_file_path)
         print('vsc',chroma_vector_store)
+        # docs = chroma_vector_store.similarity_search(query)   ## a test
+        # print(docs[0].page_content)   # a test
+        # embedding_vector = embeddings.embed_query(query)  ## a test
+        # docs = chroma_vector_store.similarity_search_by_vector(embedding_vector)   # a test
+        # print(docs[0].page_content)    # a test
         # Perform operations with chroma_vector_store if needed
     except Exception as e:
         print(f"An error occurred: {e}")
