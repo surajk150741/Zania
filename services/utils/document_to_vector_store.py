@@ -44,9 +44,11 @@ if __name__ == "__main__":
     
     try:
         chroma_vector_store = load_or_create_chroma_vector_store(handbook_file_path)
-        print('vsc',chroma_vector_store)
-        # docs = chroma_vector_store.similarity_search(query)   ## a test
-        # print(docs[0].page_content)   # a test
+        # print('vsc',chroma_vector_store)
+        # stored_embeddings, documents = chroma_vector_store
+        # print('vsc',documents)
+        docs = chroma_vector_store.similarity_search(query)   ## a test
+        print(docs[0].page_content)   # a test
         # embedding_vector = embeddings.embed_query(query)  ## a test
         # docs = chroma_vector_store.similarity_search_by_vector(embedding_vector)   # a test
         # print(docs[0].page_content)    # a test
